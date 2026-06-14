@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}Admin — Social Text{% endblock %}
+{% block content %}
+<div class="page-wide" style="max-width:900px;">
+
+<h1 class="section-title" style="font-size:1.4rem;">Admin Dashboard</h1>
+
+<div class="stat-grid">
+    <div class="stat-card">
+        <div class="stat-number">{{ stats.total_users }}</div>
+        <div class="stat-label">Users</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">{{ stats.total_posts }}</div>
+        <div class="stat-label">Posts</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">{{ stats.total_comments }}</div>
+        <div class="stat-label">Comments</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">{{ stats.total_friendships }}</div>
+        <div class="stat-label">Friendships</div>
+    </div>
+</div>
+
+<div class="card" style="padding:0; overflow:hidden;">
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Joined</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td class="muted">{{ user.id }}</td>
+                <td><strong>{{ user.username }}</strong></td>
+                <td class="muted">{{ user.email }}</td>
+                <td>
+                    {% if user.role == 'admin' %}
+                    <span class="badge badge-admin">admin</span>
+                    {% else %}
+                    <span class="muted">user</span>
+                    {% endif %}
+                </td>
+                <td class="muted">{{ user.created_at.strftime('%Y-%m-%d') }}</td>
+                <td>
+                    {% if user.id != current_user.id %}
+                    <div class="flex gap-sm">
+                        <form method="POST" action="{{ url_for('admin_toggle_role', user_id=user.id) }}">
+                            <button class="btn btn-warning btn-sm">
+                                {% if user.role == 'admin' %}Demote{% else %}Make Admin{% endif %}
+                            </button>
+                        </form>
+                        <form method="POST" action="{{ url_for('admin_delete_user', user_id=user.id) }}">
+                            <button class="btn btn-danger btn-sm">Delete</button>
+                        </form>
+                    </div>
+                    {% else %}
+                    <span class="muted">you</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+</div>
+{% endblock %}

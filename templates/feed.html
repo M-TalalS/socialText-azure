@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block title %}Feed — Social Text{% endblock %}
+{% block content %}
+
+<div class="tab-bar">
+    <a class="tab {% if view == 'public' %}active{% endif %}" href="{{ url_for('feed') }}">🌐 Public</a>
+    <a class="tab {% if view == 'friends' %}active{% endif %}" href="{{ url_for('feed') }}?view=friends">👥 Friends</a>
+</div>
+
+<div class="card">
+    <form method="POST" action="{{ url_for('create_post') }}">
+        <div class="form-group">
+            <textarea name="content" placeholder="What's on your mind?" required></textarea>
+        </div>
+        <div class="form-row">
+            <select name="visibility" style="width:auto; flex:none;">
+                <option value="public">🌐 Public</option>
+                <option value="friends">👥 Friends only</option>
+            </select>
+            <button type="submit" class="btn btn-primary">Post</button>
+        </div>
+    </form>
+</div>
+
+{% if not posts %}
+<p class="muted center mt-2">Nothing here yet.</p>
+{% endif %}
+
+{% for post in posts %}
+<div class="card">
+    <div class="post-header">
+        <div>
+            <span class="post-author">{{ post.author.username }}</span>
+            <span class="badge {% if post.visibility == 'friends' %}badge-friends{% else %}badge-public{% endif %}" style="margin-left:.4rem;">
+                {{ post.visibility }}
+            </span>
+        </div>
+        <span class="post-meta">{{ post.created_at.strftime('%b %d, %Y · %H:%M') }}</span>
+    </div>
+
+    <p class="post-content">{{ post.content }}</p>
+
+    <div class="post-actions">
+        {% set liked = post.likes | selectattr('user_id', 'equalto', current_user.id) | list %}
+        <form method="POST" action="{{ url_for('like_post', post_id=post.id) }}">
+            <button type="submit" class="btn btn-ghost btn-sm {% if liked %}btn-primary{% endif %}">
+                👍 {{ post.likes | length }}
+            </button>
+        </form>
+
+        {% if post.user_id == current_user.id or current_user.is_admin() %}
+        <form method="POST" action="{{ url_for('delete_post', post_id=post.id) }}">
+            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+        </form>
+        {% endif %}
+    </div>
+
+    <div class="comments">
+        {% for comment in post.comments %}
+        <div class="comment">
+            <span>
+                <span class="comment-author">{{ comment.user.username }}:</span>
+                {{ comment.content }}
+            </span>
+            {% if comment.user_id == current_user.id or current_user.is_admin() %}
+            <form method="POST" action="{{ url_for('delete_comment', comment_id=comment.id) }}">
+                <button type="submit" class="btn btn-ghost btn-sm" style="color:var(--danger);">✕</button>
+            </form>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <form method="POST" action="{{ url_for('comment_post', post_id=post.id) }}" class="comment-input-row">
+            <input type="text" name="content" placeholder="Write a comment…" required>
+            <button type="submit" class="btn btn-ghost btn-sm">Send</button>
+        </form>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block title %}Friends — Social Text{% endblock %}
+{% block content %}
+
+{% if incoming %}
+<p class="section-title">Incoming requests <span class="badge badge-friends">{{ incoming | length }}</span></p>
+{% for fr in incoming %}
+<div class="people-row">
+    <span>{{ fr.requester.username }}</span>
+    <div class="people-row-actions">
+        <form method="POST" action="{{ url_for('accept_friend_request', request_id=fr.id) }}">
+            <button class="btn btn-primary btn-sm">Accept</button>
+        </form>
+        <form method="POST" action="{{ url_for('decline_friend_request', request_id=fr.id) }}">
+            <button class="btn btn-ghost btn-sm" style="color:var(--danger);">Decline</button>
+        </form>
+    </div>
+</div>
+{% endfor %}
+<hr>
+{% endif %}
+
+{% if outgoing %}
+<p class="section-title">Sent requests</p>
+{% for fr in outgoing %}
+<div class="people-row">
+    <span>{{ fr.receiver.username }} <span class="muted" style="font-size:.8rem;">pending</span></span>
+    <form method="POST" action="{{ url_for('decline_friend_request', request_id=fr.id) }}">
+        <button class="btn btn-ghost btn-sm">Cancel</button>
+    </form>
+</div>
+{% endfor %}
+<hr>
+{% endif %}
+
+<p class="section-title">Your friends ({{ friend_list | length }})</p>
+{% if not friend_list %}
+<p class="muted">No friends yet — send some requests below.</p>
+{% endif %}
+{% for f in friend_list %}
+<div class="people-row">
+    <span>{{ f.username }}</span>
+    <form method="POST" action="{{ url_for('unfriend', user_id=f.id) }}">
+        <button class="btn btn-ghost btn-sm" style="color:var(--danger);">Unfriend</button>
+    </form>
+</div>
+{% endfor %}
+
+{% if other_users %}
+<hr>
+<p class="section-title">Find people</p>
+{% for u in other_users %}
+<div class="people-row">
+    <span>{{ u.username }}</span>
+    <form method="POST" action="{{ url_for('send_friend_request', user_id=u.id) }}">
+        <button class="btn btn-primary btn-sm">Add friend</button>
+    </form>
+</div>
+{% endfor %}
+{% endif %}
+
+{% endblock %}

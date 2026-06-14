@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block title %}Error {{ code }}{% endblock %}
+{% block content %}
+<div class="center" style="margin-top:4rem;">
+    <p style="font-size:4rem; font-weight:800; color:var(--primary);">{{ code }}</p>
+    <p style="font-size:1.1rem; margin-bottom:1.5rem;">{{ message }}</p>
+    <a href="{{ url_for('feed') }}" class="btn btn-primary">Back to feed</a>
+</div>
+{% endblock %}
